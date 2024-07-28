@@ -1,77 +1,81 @@
-name: NuGet Publish
+name: Publish
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  GITHUB_ACTIONS: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    outputs:
+      Version: ${{ steps.gitversion.outputs.SemVer }}
+      CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSource }}
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      -   uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
 
-      - name: Setup .NET
+      - name: Setup .NET Core
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: |
+            6.x
+            8.x
 
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Tool Restore
+        run: dotnet tool restore
 
-      - name: Build project
-        run: dotnet build --configuration Release --no-restore
+      -   name: Install GitVersion
+          uses: gittools/actions/gitversion/setup@v0.10.2
+          with:
+            versionSpec: 5.x
 
-      - name: Run tests
-        run: dotnet test --no-restore --verbosity normal
+      -   name: Determine Version
+          uses: gittools/actions/gitversion/execute@v0.10.2
+          id: gitversion
 
-      - name: Get current version
-        id: get_version
-        run: |
-          VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
-          echo "::set-output name=VERSION::$VERSION"
+      -   name: Display GitVersion outputs
+          run: |
+            echo "Version: ${{ steps.gitversion.outputs.SemVer }}"
+            echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSource }}"
 
-      - name: Calculate next version
-        id: next_version
-        run: |
-          CURRENT_VERSION=${{ steps.get_version.outputs.VERSION }}
-          IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
-          MAJOR=${VERSION_PARTS[0]}
-          MINOR=${VERSION_PARTS[1]}
-          PATCH=${VERSION_PARTS[2]}
-          PATCH=$((PATCH + 1))
-          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-          echo "::set-output name=NEW_VERSION::$NEW_VERSION"
+      -   name: Run tests
+          run: dotnet test --no-restore --verbosity normal
 
-      - name: Set version
-        run: echo "VERSION=${{ steps.next_version.outputs.NEW_VERSION }}" > version.txt
+      -   name: Build and Pack NuGet package
+          run: dotnet pack --configuration Release --include-symbols -p:Version='${{ steps.gitversion.outputs.SemVer }}' --output ./Package
 
-      - name: Pack project
-        run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.next_version.outputs.NEW_VERSION }} --no-restore
+      -   name: Upload NuGet artifact to GitHub
+          uses: actions/upload-artifact@v3
+          with:
+            name: libPackage
+            path: ./Package
+  
+  release:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && needs.build.outputs.CommitsSinceVersionSource > 0
+    needs: build
+    
+    steps:
+      -   name: Download lib nuget package artifact
+          uses: actions/download-artifact@v3
+          with:
+            name: libPackage
+            path: ./libPackage
 
-      - name: Configure Git
-        run: |
-          git config --global user.email "your-email@example.com"
-          git config --global user.name "Your Name"
+      -   name: Push package to Nuget
+          run: |
+            dotnet nuget push libPackage/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
 
-      - name: Create Git tag
-        run: git tag ${{ steps.next_version.outputs.NEW_VERSION }}
-
-      - name: Push tags
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          git remote set-url origin https://x-access-token:${{secrets.GH_TOKEN}}@github.com/${{ github.repository }}.git
-          git push origin --tags
-
-      - name: Publish to NuGet
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: dotnet nuget push '**/*.nupkg' --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
-
-      - name: Publish to GitHub Packages
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: dotnet nuget push '**/*.nupkg' --api-key $GH_TOKEN --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+      -   name: Create Release
+          uses: ncipollo/release-action@v1
+          with:
+            tag: ${{ needs.build.outputs.Version }}
+            name: Release ${{ needs.build.outputs.Version }}
+            artifacts: "libPackage/*"
+            token: ${{ secrets.GITHUB_TOKEN }}
