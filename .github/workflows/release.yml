@@ -43,7 +43,7 @@ jobs:
             echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSource }}"
 
       -   name: Run tests
-          run: dotnet test --no-restore --verbosity normal
+          run: dotnet test --verbosity normal
 
       -   name: Build and Pack NuGet package
           run: dotnet pack --configuration Release --include-symbols -p:Version='${{ steps.gitversion.outputs.SemVer }}' --output ./Package
