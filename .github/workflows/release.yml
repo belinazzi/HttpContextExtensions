@@ -31,24 +31,28 @@ jobs:
         id: get_version
         run: |
           VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
-          echo ::set-output name=VERSION::$VERSION
+          echo "::set-output name=VERSION::$VERSION"
 
       - name: Calculate next version
         id: next_version
-        uses: actions/semver-release-action@v1
-        with:
-          current_version: ${{ steps.get_version.outputs.VERSION }}
-          release: patch # 'patch', 'major' or 'minor'
+        run: |
+          CURRENT_VERSION=${{ steps.get_version.outputs.VERSION }}
+          IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+          PATCH=$((MINOR + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "::set-output name=NEW_VERSION::$NEW_VERSION"
 
       - name: Set version
-        id: set_version
-        run: echo "VERSION=${{ steps.next_version.outputs.new_version }}" > version.txt
+        run: echo "VERSION=${{ steps.next_version.outputs.NEW_VERSION }}" > version.txt
 
       - name: Pack project
-        run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.next_version.outputs.new_version }} --no-restore
+        run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.next_version.outputs.NEW_VERSION }} --no-restore
 
       - name: Create Git tag
-        run: git tag ${{ steps.next_version.outputs.new_version }}
+        run: git tag ${{ steps.next_version.outputs.NEW_VERSION }}
 
       - name: Push tags
         run: git push origin --tags
