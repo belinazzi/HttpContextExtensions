@@ -1,0 +1,59 @@
+name: NuGet Publish
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --no-restore --verbosity normal
+
+      - name: Get current version
+        id: get_version
+        run: |
+          VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+          echo ::set-output name=VERSION::$VERSION
+
+      - name: Calculate next version
+        id: next_version
+        uses: actions/semver-release-action@v1
+        with:
+          current_version: ${{ steps.get_version.outputs.VERSION }}
+          release: patch # 'patch', 'major' or 'minor'
+
+      - name: Set version
+        id: set_version
+        run: echo "VERSION=${{ steps.next_version.outputs.new_version }}" > version.txt
+
+      - name: Pack project
+        run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.next_version.outputs.new_version }} --no-restore
+
+      - name: Create Git tag
+        run: git tag ${{ steps.next_version.outputs.new_version }}
+
+      - name: Push tags
+        run: git push origin --tags
+
+      - name: Publish to NuGet
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push '**/*.nupkg' --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
