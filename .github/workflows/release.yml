@@ -55,11 +55,7 @@ jobs:
         run: git tag ${{ steps.next_version.outputs.NEW_VERSION }}
 
       - name: Push tags
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
-          git push origin --tags
+        run: git push origin --tags --follow-tags -u Belinazzi:${{ secrets.GH_TOKEN }}
 
       - name: Publish to NuGet
         env:
