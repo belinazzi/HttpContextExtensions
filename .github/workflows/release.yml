@@ -51,11 +51,20 @@ jobs:
       - name: Pack project
         run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.next_version.outputs.NEW_VERSION }} --no-restore
 
+      - name: Configure Git
+        run: |
+          git config --global user.email "your-email@example.com"
+          git config --global user.name "Your Name"
+
       - name: Create Git tag
         run: git tag ${{ steps.next_version.outputs.NEW_VERSION }}
 
       - name: Push tags
-        run: git push origin --tags --follow-tags -u Belinazzi:${{ secrets.GH_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git remote set-url origin https://x-access-token:${{secrets.GH_TOKEN}}@github.com/${{ github.repository }}.git
+          git push origin --tags
 
       - name: Publish to NuGet
         env:
