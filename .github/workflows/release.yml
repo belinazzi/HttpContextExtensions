@@ -41,7 +41,7 @@ jobs:
           MAJOR=${VERSION_PARTS[0]}
           MINOR=${VERSION_PARTS[1]}
           PATCH=${VERSION_PARTS[2]}
-          PATCH=$((MINOR + 1))
+          PATCH=$((PATCH + 1))
           NEW_VERSION="$MAJOR.$MINOR.$PATCH"
           echo "::set-output name=NEW_VERSION::$NEW_VERSION"
 
@@ -55,9 +55,18 @@ jobs:
         run: git tag ${{ steps.next_version.outputs.NEW_VERSION }}
 
       - name: Push tags
-        run: git push origin --tags
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}
+          git push origin --tags
 
       - name: Publish to NuGet
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: dotnet nuget push '**/*.nupkg' --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+
+      - name: Publish to GitHub Packages
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: dotnet nuget push '**/*.nupkg' --api-key $GH_TOKEN --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
