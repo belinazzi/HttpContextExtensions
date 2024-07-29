@@ -5,10 +5,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="LICENSE">
-            <Pack>true</Pack>
-            <PackagePath>LICENSE</PackagePath>
-        </None>
         <None Update="icon.png">
             <Pack>true</Pack>
             <PackagePath>icon.png</PackagePath>
@@ -28,7 +24,7 @@
         <Authors>Thales Belinazzi</Authors>
         <Description>Library that provides useful features for working with HttpContext in ASP.NET Core. This library simplifies accessing common HTTP context information and manipulating data in web requests, blacklist and whitelist IPS and more.</Description>
         <PackageTags>HttpContext;ASP.NET;ASP.NET Core;Middleware;Request;Response;IP;IP Filter;IP Information;Dependency Injection;C#;.NET;NET6;NET7;NET8;Tracking;Web;Web Development;Web API;Security;Extensions</PackageTags>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/belinazzi/HttpContextExtensions</PackageProjectUrl>
         <RepositoryUrl>https://github.com/belinazzi/HttpContextExtensions</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
