@@ -26,7 +26,7 @@ public class Request
     public string? Endpoint { get; set; }
     
     /// <summary>
-    /// The request query params, like ?name=Joe&lastname=doe.
+    /// The request query param.
     /// </summary>
     public string? QueryParameters { get; set; }
     
