@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HttpContextExtensions.Attributes.Whitelist;
 
+/// <summary>
+/// Middleware to apply Whitelist on all endpoints, controllers or minimal apis.
+/// </summary>
 public class IpWhitelist : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
