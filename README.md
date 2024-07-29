@@ -1,6 +1,5 @@
-<div style="text-align: center;">
+<div align="center" style="text-align: center;">
 <img src="./logo.png" alt="Logo" />
-
 </div>
 
 ## Description
