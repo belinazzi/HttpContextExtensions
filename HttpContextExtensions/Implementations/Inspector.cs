@@ -4,16 +4,28 @@ using Microsoft.AspNetCore.Http;
 
 namespace HttpContextExtensions.Implementations;
 
+/// <summary>
+/// A class to retrieve data from HttpContext
+/// </summary>
 public class Inspector(InspectorOptions options) : IInspector
 {
+    /// <summary>
+    /// The HttpContext to use.
+    /// </summary>
     private HttpContext Context { get; set; } = null!;
 
+    /// <summary>
+    /// Set the HttpContext used by inspector.
+    /// </summary>
     public IInspector For(HttpContext context)
     {
         Context = context;
         return this;
     }
 
+    /// <summary>
+    /// Get the request IP. If behind proxy, configure the IpHeaderName on InspectorOptions.
+    /// </summary>
     public string GetIp()
     {
         var ip = string.Empty;
@@ -22,17 +34,26 @@ public class Inspector(InspectorOptions options) : IInspector
         return string.IsNullOrEmpty(ip) ? Context.Connection.RemoteIpAddress!.ToString() : ip;
     }
 
+    /// <summary>
+    /// Get the request tracker GUID or null if not enabled.
+    /// </summary>
     public Guid? GetRequestTracker()
     {
         var guid = Context.Items["RequestTracker"];
         return guid != null ? Guid.Parse(guid.ToString()!) : null;
     }
 
+    /// <summary>
+    /// Get request User Agent header.
+    /// </summary>
     public string? GetUserAgent()
     {
         return Context.Request.Headers.UserAgent.FirstOrDefault();
     }
 
+    /// <summary>
+    /// Get the Request model with some information about the HttpContext.
+    /// </summary>
     public Request GetRequest()
     {
         string body;
@@ -54,6 +75,9 @@ public class Inspector(InspectorOptions options) : IInspector
         };
     }
 
+    /// <summary>
+    /// Get the Response model of HttpContext, effective if the Response was gerenated, generaly used inside middlewares.
+    /// </summary>
     public Response GetResponse()
     {
         string body;
@@ -70,6 +94,9 @@ public class Inspector(InspectorOptions options) : IInspector
         };
     }
 
+    /// <summary>
+    /// Get information about the IP, the IP Info Provider must be configured.
+    /// </summary>
     public RequestIpInfo GetIpInfo()
     {
         return new RequestIpInfo
@@ -82,6 +109,9 @@ public class Inspector(InspectorOptions options) : IInspector
         };
     }
 
+    /// <summary>
+    /// Get custom data from your configured Provider.
+    /// </summary>
     public T GetData<T>()
     {
         return options.Provider.GetData<T>(GetIp()).Result;

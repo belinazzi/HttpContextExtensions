@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace HttpContextExtensions.Middlewares.Whitelist;
 
+/// <summary>
+/// The whitelist middleware, will apply configured rule to any endpoint.
+/// </summary>
 public class IpWhitelistMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context, IInspector inspector,

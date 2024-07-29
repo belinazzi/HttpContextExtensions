@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HttpContextExtensions.Attributes.Blacklist;
 
+/// <summary>
+/// Middleware to apply Blacklist on all endpoints, controllers or minimal apis.
+/// </summary>
 public class IpBlacklist : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
