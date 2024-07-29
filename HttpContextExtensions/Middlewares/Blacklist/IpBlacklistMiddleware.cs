@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace HttpContextExtensions.Middlewares.Blacklist;
 
+/// <summary>
+/// The blacklist middleware, will apply configured rule to any endpoint.
+/// </summary>
 public class IpBlacklistMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context, IInspector inspector,
