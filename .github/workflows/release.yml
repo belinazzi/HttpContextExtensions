@@ -44,18 +44,12 @@ jobs:
 
       -   name: Run tests
           run: dotnet test --verbosity normal
-          
-      -   name: Create Package dir
-          run: mkdir -p ./Package
-          
-      -   name: Copy LICENSE
-          run: cp LICENSE ./Package
 
       -   name: Copy README
-          run: cp README.md ./Package
+          run: cp README.md ./HttpContextExtensions
 
       -   name: Copy icon
-          run: cp icon.png ./Package
+          run: cp icon.png ./HttpContextExtensions
 
       -   name: Build and Pack NuGet package
           run: dotnet pack --configuration Release --include-symbols -p:Version='${{ steps.gitversion.outputs.SemVer }}' --output ./Package
