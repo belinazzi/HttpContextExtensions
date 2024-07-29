@@ -74,7 +74,7 @@ jobs:
 
       -   name: Push package to Nuget
           run: |
-            dotnet nuget push libPackage/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+            dotnet nuget push libPackage/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       -   name: Create Release
           uses: ncipollo/release-action@v1
