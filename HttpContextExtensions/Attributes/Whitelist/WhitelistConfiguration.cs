@@ -6,12 +6,20 @@ namespace HttpContextExtensions.Attributes.Whitelist;
 /// Configuration for whitelist feature.
 /// </summary>
 [ExcludeFromCodeCoverage]
-public class WhitelistConfiguration(HashSet<string> ips) : IWhitelistConfiguration
+public class WhitelistConfiguration : IWhitelistConfiguration
 {
+    /// <summary>
+    /// Configuration for whitelist feature.
+    /// </summary>
+    public WhitelistConfiguration(HashSet<string> ips)
+    {
+        Ips = ips;
+    }
+
     /// <summary>
     /// HashSet with all ips to blacklist.
     /// </summary>
-    private HashSet<string> Ips { get; } = ips;
+    private HashSet<string> Ips { get; }
     
     /// <summary>
     /// Redirect URL for blocked requests.

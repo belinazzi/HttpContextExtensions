@@ -7,8 +7,18 @@ namespace HttpContextExtensions.Implementations;
 /// <summary>
 /// A class to retrieve data from HttpContext
 /// </summary>
-public class Inspector(InspectorOptions options) : IInspector
+public class Inspector : IInspector
 {
+    private readonly InspectorOptions _options;
+
+    /// <summary>
+    /// A class to retrieve data from HttpContext
+    /// </summary>
+    public Inspector(InspectorOptions options)
+    {
+        _options = options;
+    }
+
     /// <summary>
     /// The HttpContext to use.
     /// </summary>
@@ -29,7 +39,7 @@ public class Inspector(InspectorOptions options) : IInspector
     public string GetIp()
     {
         var ip = string.Empty;
-        if (options.IpHeaderName != null)
+        if (_options.IpHeaderName != null)
             ip = Context.Request.Headers["X-Real-IP"].FirstOrDefault();
         return string.IsNullOrEmpty(ip) ? Context.Connection.RemoteIpAddress!.ToString() : ip;
     }
@@ -102,10 +112,10 @@ public class Inspector(InspectorOptions options) : IInspector
         return new RequestIpInfo
         {
             Ip = GetIp(),
-            IpCountryCode = options.Provider.GetCountryCode(GetIp()).Result,
-            IpCountryName = options.Provider.GetCountryName(GetIp()).Result,
-            IpAsn = options.Provider.GetAsn(GetIp()).Result,
-            IpAsnName = options.Provider.GetAsnName(GetIp()).Result
+            IpCountryCode = _options.Provider.GetCountryCode(GetIp()).Result,
+            IpCountryName = _options.Provider.GetCountryName(GetIp()).Result,
+            IpAsn = _options.Provider.GetAsn(GetIp()).Result,
+            IpAsnName = _options.Provider.GetAsnName(GetIp()).Result
         };
     }
 
@@ -114,6 +124,6 @@ public class Inspector(InspectorOptions options) : IInspector
     /// </summary>
     public T GetData<T>()
     {
-        return options.Provider.GetData<T>(GetIp()).Result;
+        return _options.Provider.GetData<T>(GetIp()).Result;
     }
 }

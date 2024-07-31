@@ -18,6 +18,7 @@
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>
+        <TargetFrameworks>net8.0;net6.0;net7.0</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -33,7 +34,6 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
