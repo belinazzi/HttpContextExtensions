@@ -7,8 +7,18 @@ namespace HttpContextExtensions.Middlewares.Whitelist;
 /// <summary>
 /// The whitelist middleware, will apply configured rule to any endpoint.
 /// </summary>
-public class IpWhitelistMiddleware(RequestDelegate next)
+public class IpWhitelistMiddleware
 {
+    private readonly RequestDelegate _next;
+
+    /// <summary>
+    /// The whitelist middleware, will apply configured rule to any endpoint.
+    /// </summary>
+    public IpWhitelistMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
     public async Task InvokeAsync(HttpContext context, IInspector inspector,
         IWhitelistConfiguration whitelistConfiguration)
     {
@@ -22,6 +32,6 @@ public class IpWhitelistMiddleware(RequestDelegate next)
             return;
         }
 
-        await next(context);
+        await _next(context);
     }
 }

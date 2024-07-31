@@ -7,8 +7,18 @@ namespace HttpContextExtensions.Middlewares.Blacklist;
 /// <summary>
 /// The blacklist middleware, will apply configured rule to any endpoint.
 /// </summary>
-public class IpBlacklistMiddleware(RequestDelegate next)
+public class IpBlacklistMiddleware
 {
+    private readonly RequestDelegate _next;
+
+    /// <summary>
+    /// The blacklist middleware, will apply configured rule to any endpoint.
+    /// </summary>
+    public IpBlacklistMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
     public async Task InvokeAsync(HttpContext context, IInspector inspector,
         IBlacklistConfiguration blacklistConfiguration)
     {
@@ -22,6 +32,6 @@ public class IpBlacklistMiddleware(RequestDelegate next)
             return;
         }
 
-        await next(context);
+        await _next(context);
     }
 }
