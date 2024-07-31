@@ -5,8 +5,18 @@ namespace HttpContextExtensions.Middlewares.Tracker;
 /// <summary>
 /// The request tracker middleware, will add a GUID to all requests and responses.
 /// </summary>
-public class RequestTrackerMiddleware(RequestDelegate next)
+public class RequestTrackerMiddleware
 {
+    private readonly RequestDelegate _next;
+
+    /// <summary>
+    /// The request tracker middleware, will add a GUID to all requests and responses.
+    /// </summary>
+    public RequestTrackerMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
     public async Task InvokeAsync(HttpContext context)
     {
         var requestGuid = Guid.NewGuid().ToString();
@@ -16,6 +26,6 @@ public class RequestTrackerMiddleware(RequestDelegate next)
             context.Response.Headers.Append("X-Request-Tracker", requestGuid);
             return Task.CompletedTask;
         });
-        await next(context);
+        await _next(context);
     }
 }

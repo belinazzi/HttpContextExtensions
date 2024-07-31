@@ -17,9 +17,10 @@ public class InspectorTests
     {
         _contextMock = new Mock<HttpContext>();
         _providerMock = new Mock<IProvider>();
-        _inspector = new InspectorOptions()
-            .SetIpInfoProvider(_providerMock.Object)
-            .SetIpHeaderName("X-Real-IP").BuildInspector();
+        _serviceProviderMock = new Mock<IServiceProvider>();
+        _serviceProviderMock.Setup(sp => sp.GetService(typeof(IProvider))).Returns(_providerMock.Object);
+        _inspector = new Inspector(new InspectorOptions()
+            .SetIpHeaderName("X-Real-IP"), _serviceProviderMock.Object);
 
         var dictionary = new HeaderDictionary();
         dictionary.Append(HeaderNames.Cookie, new StringValues("cookie1=value1"));
@@ -45,6 +46,7 @@ public class InspectorTests
     private Mock<HttpContext> _contextMock;
     private IInspector _inspector;
     private Mock<IProvider> _providerMock;
+    private Mock<IServiceProvider> _serviceProviderMock;
 
     private const string Path = "/test";
     private const string QueryString = "?param1=value1";

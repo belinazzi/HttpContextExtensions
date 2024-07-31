@@ -1,14 +1,27 @@
 using HttpContextExtensions.Interfaces;
 using HttpContextExtensions.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HttpContextExtensions.Implementations;
 
 /// <summary>
 /// A class to retrieve data from HttpContext
 /// </summary>
-public class Inspector(InspectorOptions options) : IInspector
+public class Inspector : IInspector
 {
+    private readonly IInspectorOptions _options;
+    private readonly IProvider? _provider;
+
+    /// <summary>
+    /// A class to retrieve data from HttpContext
+    /// </summary>
+    public Inspector(IInspectorOptions options, IServiceProvider serviceProvider)
+    {
+        _options = options;
+        _provider = serviceProvider.GetService<IProvider>();
+    }
+
     /// <summary>
     /// The HttpContext to use.
     /// </summary>
@@ -29,8 +42,8 @@ public class Inspector(InspectorOptions options) : IInspector
     public string GetIp()
     {
         var ip = string.Empty;
-        if (options.IpHeaderName != null)
-            ip = Context.Request.Headers["X-Real-IP"].FirstOrDefault();
+        if (_options.GetIpHeaderName() != null)
+            ip = Context.Request.Headers[_options.GetIpHeaderName()!].FirstOrDefault();
         return string.IsNullOrEmpty(ip) ? Context.Connection.RemoteIpAddress!.ToString() : ip;
     }
 
@@ -102,10 +115,10 @@ public class Inspector(InspectorOptions options) : IInspector
         return new RequestIpInfo
         {
             Ip = GetIp(),
-            IpCountryCode = options.Provider.GetCountryCode(GetIp()).Result,
-            IpCountryName = options.Provider.GetCountryName(GetIp()).Result,
-            IpAsn = options.Provider.GetAsn(GetIp()).Result,
-            IpAsnName = options.Provider.GetAsnName(GetIp()).Result
+            IpCountryCode = _provider?.GetCountryCode(GetIp()).Result,
+            IpCountryName = _provider?.GetCountryName(GetIp()).Result,
+            IpAsn = _provider?.GetAsn(GetIp()).Result,
+            IpAsnName = _provider?.GetAsnName(GetIp()).Result
         };
     }
 
@@ -114,6 +127,8 @@ public class Inspector(InspectorOptions options) : IInspector
     /// </summary>
     public T GetData<T>()
     {
-        return options.Provider.GetData<T>(GetIp()).Result;
+        if (_provider is null)
+            throw new Exception("IProvider must be configured to use this method");
+        return _provider.GetData<T>(GetIp()).Result;
     }
 }
