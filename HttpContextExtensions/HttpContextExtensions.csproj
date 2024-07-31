@@ -3,17 +3,6 @@
     <ItemGroup>
         <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <None Update="icon.png">
-            <Pack>true</Pack>
-            <PackagePath>icon.png</PackagePath>
-        </None>
-        <None Update="README.md">
-            <Pack>true</Pack>
-            <PackagePath>README.md</PackagePath>
-        </None>
-    </ItemGroup>
     
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -32,6 +21,24 @@
         <PackageIcon>icon.png</PackageIcon>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="icon.png" />
+      <Resource Include="icon.png">
+        <Pack>true</Pack>
+        <PackagePath>icon.png</PackagePath>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Resource>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="../README.md" />
+        <Resource Include="../README.md">
+            <Pack>true</Pack>
+            <PackagePath>README.md</PackagePath>
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Resource>
+    </ItemGroup>
 
     <PropertyGroup>
         <ImplicitUsings>enable</ImplicitUsings>
