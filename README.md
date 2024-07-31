@@ -37,15 +37,14 @@ dotnet Install-Package HttpContextExtensions
 ### Base usage
 
 ```csharp
-var provider = new CustomIpInfoProvider();
-
-builder.Services.AddSingleton<IInspector>(new InspectorOptions().SetIpHeaderName("X-Real-Ip")
-.SetIpInfoProvider(provider).BuildInspector());
+builder.Services.AddSingleton(new InspectorOptions().SetIpHeaderName("X-Real-IP")); //SINGLETON OR SCOPPED
+builder.Services.AddScoped<IProvider, CustomIpInfoProvider>(); //SINGLETON OR SCOPPED, YOUR CHOICE
+builder.Services.AddScoped<IInspector, Inspector>(); //SCOPPED ONLY
 ```
 
 **IP Header name** is **optional**, and can be configured to get real IP behind proxies like **Nginx** and **CloudFlare**.
 
-**IP Info Provider** is **optional** too, you need to implement IProvider interface, and pass the concrete class on provider parameter.
+**IP Info Provider** is **optional** too, you need to implement IProvider interface and inject your implementation.
 
 ---
 
@@ -94,6 +93,7 @@ with an IP Intelligence service, like MaxMind, IpToLocation or any other.
 The endpoint will return 403 Forbidden when the IP does not match the rule.
 Never use Whitelist and Blacklist on the same scope.
 SetRedirectUrl is optional.
+Only IPV4 without mask is supported at this time.
 
 ##### Ips Configuration
 
@@ -130,7 +130,6 @@ public class MyController : ControllerBase
 ##### Controller based usage
 
 ```csharp
-//Controller Based
 [IpBlacklist]
 public class MyController : ControllerBase {}
 
@@ -141,7 +140,6 @@ public class MyController : ControllerBase {}
 ##### Middleware based usage
 
 ```csharp
-//Middleware Based
 app.UseIpBlacklist();
 app.UseIpWhitelist();
 ```
