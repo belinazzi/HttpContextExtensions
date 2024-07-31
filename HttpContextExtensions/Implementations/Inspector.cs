@@ -40,7 +40,7 @@ public class Inspector : IInspector
     {
         var ip = string.Empty;
         if (_options.IpHeaderName != null)
-            ip = Context.Request.Headers["X-Real-IP"].FirstOrDefault();
+            ip = Context.Request.Headers[_options.IpHeaderName].FirstOrDefault();
         return string.IsNullOrEmpty(ip) ? Context.Connection.RemoteIpAddress!.ToString() : ip;
     }
 
